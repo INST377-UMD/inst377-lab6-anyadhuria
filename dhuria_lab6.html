@@ -1,0 +1,56 @@
+<html>
+<head>
+  <title>USA Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #USMap { height: 300px; width: 100%; }
+    .markerStyle {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Map of US</h1>
+  <div id="USMap"></div>
+  <div id="info"></div>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    function getRandomInRange(from, to, fixed) {
+      return (Math.random() * (to - from) + from).toFixed(fixed) * 1; 
+    }
+    const points = [
+      { x: getRandomInRange(30, 35, 3), y: getRandomInRange(-90, -100, 3) },
+      { x: getRandomInRange(30, 35, 3), y: getRandomInRange(-90, -100, 3) },
+      { x: getRandomInRange(30, 35, 3), y: getRandomInRange(-90, -100, 3) }
+    ];
+    const myMap = L.map('USMap').setView([40, -99], 4);
+
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 25,
+      attribution: 'Map data © OpenStreetMap'
+    }).addTo(myMap);
+    async function showPoints() {
+      for (let i = 0; i < points.length; i++) {
+        const lat = points[i].x;
+        const lon = points[i].y;
+        const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+        const data = await response.json();
+        const place = data.locality || "Unknown Place";
+
+        L.marker([lat, lon]).addTo(myMap).bindPopup(`Point ${i + 1}: ${place}`).openPopup();
+        document.getElementById('info').innerHTML += `
+          <p>
+            <span class="markerStyle">Marker ${i + 1}: Latitude: ${lat} Longitude: ${lon}</span><br>
+            <span class="localityInfo">Locality: ${place}</span>
+          </p>`;
+      }
+    }
+    showPoints();
+  </script>
+</body>
+</html>
+
+
+
+
